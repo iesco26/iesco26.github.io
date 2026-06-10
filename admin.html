@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IESCO Admin Dashboard</title>
+<style>
+  :root {
+    --blue: #0767b1;
+    --blue-dark: #055a9a;
+    --blue-light: #e6f2fa;
+    --navy: #054e87;
+    --green: #16a34a;
+    --green-light: #dcfce7;
+    --red: #dc2626;
+    --red-light: #fef2f2;
+    --amber: #d97706;
+    --amber-light: #fffbeb;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-400: #94a3b8;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+    --white: #ffffff;
+    --sidebar-w: 240px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", system-ui, sans-serif; background: var(--gray-50); color: var(--gray-700); }
+  .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%); padding: 24px; }
+  .login-card { background: white; border-radius: 16px; padding: 44px 40px; width: 100%; max-width: 400px; box-shadow: 0 24px 64px rgba(0,0,0,.18); }
+  .login-logo { text-align: center; margin-bottom: 28px; }
+  .login-logo-icon { width: 52px; height: 52px; background: var(--blue); border-radius: 12px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+  .login-logo-icon svg { width: 28px; height: 28px; fill: white; }
+  .login-logo h1 { font-size: 20px; font-weight: 800; color: var(--navy); }
+  .login-logo p { font-size: 13px; color: var(--gray-600); margin-top: 3px; }
+  .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+  label { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+  .input-wrap { display: flex; align-items: center; gap: 10px; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 0 14px; background: white; transition: border .2s; }
+  .input-wrap:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(7,103,177,.12); }
+  .input-wrap svg { width: 16px; height: 16px; color: var(--gray-400); flex-shrink: 0; }
+  .input-wrap input { border: none; outline: none; background: transparent; padding: 12px 0; font-size: 14px; color: var(--gray-900); width: 100%; font-family: inherit; }
+  .btn-primary { width: 100%; padding: 13px; background: var(--blue); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .2s; margin-top: 8px; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .error-bar { background: var(--red-light); border: 1px solid #fca5a5; border-radius: 8px; padding: 10px 14px; font-size: 13px; color: var(--red); margin-bottom: 14px; display: none; }
+  .app { display: none; min-height: 100vh; }
+  .app.visible { display: flex; }
+  .sidebar { width: var(--sidebar-w); background: var(--navy); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+  .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .sidebar-logo-name { font-size: 16px; font-weight: 800; color: white; }
+  .sidebar-logo-sub { font-size: 11px; color: rgba(255,255,255,.5); margin-top: 2px; }
+  .sidebar-nav { flex: 1; padding: 16px 0; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: rgba(255,255,255,.65); font-size: 14px; font-weight: 500; cursor: pointer; transition: all .15s; border-left: 3px solid transparent; }
+  .nav-item:hover { background: rgba(255,255,255,.06); color: white; }
+  .nav-item.active { background: rgba(255,255,255,.1); color: white; border-left-color: #7ee8d8; }
+  .nav-item svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid rgba(255,255,255,.1); }
+  .logout-btn { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.6); font-size: 13px; cursor: pointer; background: none; border: none; padding: 0; transition: color .15s; }
+  .logout-btn:hover { color: white; }
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar { background: white; border-bottom: 1px solid var(--gray-200); padding: 0 28px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+  .topbar-title { font-size: 17px; font-weight: 700; color: var(--navy); }
+  .topbar-user { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gray-600); }
+  .avatar { width: 32px; height: 32px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 13px; font-weight: 700; }
+  .content { padding: 28px; flex: 1; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+  .stat-card { background: white; border-radius: 12px; padding: 20px; border: 1px solid var(--gray-200); }
+  .stat-card-label { font-size: 12px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+  .stat-card-num { font-size: 28px; font-weight: 800; color: var(--navy); line-height: 1; }
+  .stat-card-num.green { color: var(--green); }
+  .stat-card-num.red { color: var(--red); }
+  .stat-card-num.amber { color: var(--amber); }
+  .filters { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+  .search-wrap { display: flex; align-items: center; gap: 8px; background: white; border: 1.5px solid var(--gray-200); border-radius: 8px; padding: 0 14px; flex: 1; min-width: 200px; max-width: 340px; }
+  .search-wrap:focus-within { border-color: var(--blue); }
+  .search-wrap svg { width: 15px; height: 15px; color: var(--gray-400); flex-shrink: 0; }
+  .search-wrap input { border: none; outline: none; padding: 9px 0; font-size: 14px; width: 100%; background: transparent; }
+  .filter-btn { padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: 1.5px solid var(--gray-200); background: white; color: var(--gray-600); transition: all .15s; }
+  .filter-btn.active { background: var(--blue); color: white; border-color: var(--blue); }
+  .filter-btn:hover:not(.active) { border-color: var(--blue); color: var(--blue); }
+  .table-wrap { background: white; border-radius: 12px; border: 1px solid var(--gray-200); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--gray-50); }
+  th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--gray-600); text-transform: uppercase; letter-spacing: .5px; border-bottom: 1px solid var(--gray-200); white-space: nowrap; }
+  td { padding: 14px 16px; font-size: 13px; border-bottom: 1px solid var(--gray-100); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--gray-50); }
+  .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+  .badge.pending { background: var(--amber-light); color: var(--amber); }
+  .badge.successful { background: var(--green-light); color: var(--green); }
+  .badge.failed { background: var(--red-light); color: var(--red); }
+  .btn-view { padding: 6px 14px; background: var(--blue-light); color: var(--blue); border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s; }
+  .btn-view:hover { background: var(--blue); color: white; }
+  .empty-state { text-align: center; padding: 60px 24px; color: var(--gray-400); font-size: 14px; }
+  .detail-overlay { display: none; position: fixed; inset: 0; background: rgba(5,78,135,.4); z-index: 100; }
+  .detail-overlay.open { display: block; }
+  .detail-panel { position: fixed; top: 0; right: 0; width: 600px; max-width: 95vw; height: 100vh; background: white; z-index: 101; box-shadow: -8px 0 32px rgba(0,0,0,.12); display: flex; flex-direction: column; transform: translateX(100%); transition: transform .3s ease; }
+  .detail-panel.open { transform: translateX(0); }
+  .panel-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; background: var(--navy); }
+  .panel-header h2 { font-size: 16px; font-weight: 700; color: white; }
+  .panel-close { background: rgba(255,255,255,.15); border: none; color: white; width: 32px; height: 32px; border-radius: 6px; cursor: pointer; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .panel-close:hover { background: rgba(255,255,255,.25); }
+  .panel-body { flex: 1; overflow-y: auto; padding: 24px; }
+  .panel-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 12px; flex-shrink: 0; background: var(--gray-50); }
+  .info-section { margin-bottom: 24px; }
+  .info-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--blue); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-item { display: flex; flex-direction: column; gap: 3px; }
+  .info-item.full { grid-column: span 2; }
+  .info-label { font-size: 11px; font-weight: 600; color: var(--gray-400); text-transform: uppercase; letter-spacing: .4px; }
+  .info-value { font-size: 14px; color: var(--gray-900); font-weight: 500; }
+  .doc-list { display: flex; flex-direction: column; gap: 8px; }
+  .doc-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--gray-50); border-radius: 8px; border: 1px solid var(--gray-200); }
+  .doc-name { font-size: 13px; color: var(--gray-700); display: flex; align-items: center; gap: 8px; }
+  .doc-name svg { width: 15px; height: 15px; color: var(--blue); }
+  .doc-link { font-size: 12px; font-weight: 600; color: var(--blue); text-decoration: none; padding: 4px 10px; background: var(--blue-light); border-radius: 5px; }
+  .doc-link:hover { background: var(--blue); color: white; }
+  .btn-approve { flex: 1; padding: 12px; background: var(--green); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-approve:hover { opacity: .88; }
+  .btn-reject { flex: 1; padding: 12px; background: var(--red); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-reject:hover { opacity: .88; }
+  .btn-approve:disabled, .btn-reject:disabled { opacity: .5; cursor: not-allowed; }
+  .status-resolved { text-align: center; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 14px; width: 100%; }
+  .loading { text-align: center; padding: 60px; color: var(--gray-400); }
+  .spinner { display: inline-block; width: 28px; height: 28px; border: 3px solid var(--gray-200); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; margin-bottom: 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 768px) { .main { margin-left: 0; } .stats-grid { grid-template-columns: 1fr 1fr; } .detail-panel { width: 100vw; } }
+</style>
+</head>
+<body>
+
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6L23 9 12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>
+      </div>
+      <h1>IESCO Admin</h1>
+      <p>Scholarship Management Dashboard</p>
+    </div>
+    <div id="loginError" class="error-bar"></div>
+    <div class="field">
+      <label>Username</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <input type="text" id="loginUser" placeholder="Admin username"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <div class="input-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="doLogin()" id="loginBtn">Sign in</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-name">IESCO Admin</div>
+      <div class="sidebar-logo-sub">Scholarship Management</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Applications
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="doLogout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title">Applications</div>
+      <div class="topbar-user">
+        <div class="avatar" id="userAvatar">A</div>
+        <span id="userName">Admin</span>
+      </div>
+    </div>
+    <div class="content" id="mainContent">
+      <div class="loading"><div class="spinner"></div><br>Loading…</div>
+    </div>
+  </div>
+</div>
+
+<div class="detail-overlay" id="detailOverlay" onclick="closePanel()"></div>
+<div class="detail-panel" id="detailPanel">
+  <div class="panel-header">
+    <h2 id="panelTitle">Application Details</h2>
+    <button class="panel-close" onclick="closePanel()">&#10005;</button>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+  <div class="panel-footer" id="panelFooter"></div>
+</div>
+
+<script>
+const API = "https://younesdjelloul.pythonanywhere.com";
+let token = localStorage.getItem("iesco_admin_token") || "";
+let allApps = [];
+let currentFilter = "all";
+let searchQuery = "";
+let currentApp = null;
+
+async function doLogin() {
+  const user = document.getElementById("loginUser").value.trim();
+  const pass = document.getElementById("loginPass").value;
+  const errEl = document.getElementById("loginError");
+  const btn = document.getElementById("loginBtn");
+  if (!user || !pass) { errEl.textContent = "Please enter username and password."; errEl.style.display = "block"; return; }
+  errEl.style.display = "none";
+  btn.disabled = true; btn.textContent = "Signing in...";
+  try {
+    const res = await fetch(API + "/login/", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({username:user,password:pass}) });
+    const data = await res.json();
+    if (res.ok && data.access) {
+      token = data.access;
+      localStorage.setItem("iesco_admin_token", token);
+      document.getElementById("userAvatar").textContent = user[0].toUpperCase();
+      document.getElementById("userName").textContent = user;
+      showApp();
+    } else {
+      errEl.textContent = data.error || "Invalid credentials."; errEl.style.display = "block";
+    }
+  } catch { errEl.textContent = "Cannot connect to server."; errEl.style.display = "block"; }
+  finally { btn.disabled = false; btn.textContent = "Sign in"; }
+}
+
+function doLogout() {
+  token = ""; localStorage.removeItem("iesco_admin_token");
+  document.getElementById("app").classList.remove("visible");
+  document.getElementById("loginPage").style.display = "flex";
+  document.getElementById("loginUser").value = "";
+  document.getElementById("loginPass").value = "";
+}
+
+function showApp() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("app").classList.add("visible");
+  loadApplications();
+}
+
+async function loadApplications() {
+  try {
+    const res = await fetch(API + "/applications/", { headers: {"Authorization":"Bearer " + token} });
+    if (res.status === 401) { doLogout(); return; }
+    const data = await res.json();
+    allApps = Array.isArray(data) ? data : (data.results || []);
+    renderApplications();
+  } catch {
+    document.getElementById("mainContent").innerHTML = "<div class='empty-state'>Failed to load applications. Check connection.</div>";
+  }
+}
+
+function renderApplications() {
+  const filtered = allApps.filter(a => {
+    const ms = currentFilter === "all" || a.application_status === currentFilter;
+    const q = searchQuery.toLowerCase();
+    const mq = !q || (a.english_name||"").toLowerCase().includes(q) || (a.passport_number||"").toLowerCase().includes(q) || (a.nationality||"").toLowerCase().includes(q) || (a.email||"").toLowerCase().includes(q);
+    return ms && mq;
+  });
+  const total = allApps.length, pending = allApps.filter(a=>a.application_status==="pending").length, approved = allApps.filter(a=>a.application_status==="successful").length, rejected = allApps.filter(a=>a.application_status==="failed").length;
+  document.getElementById("mainContent").innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-card-label">Total</div><div class="stat-card-num">${total}</div></div>
+      <div class="stat-card"><div class="stat-card-label">Pending</div><div class="stat-card-num amber">${pending}</div></div>
+      <div class="stat-card"><div class="stat-card-label">Approved</div><div class="stat-card-num green">${approved}</div></div>
+      <div class="stat-card"><div class="stat-card-label">Rejected</div><div class="stat-card-num red">${rejected}</div></div>
+    </div>
+    <div class="filters">
+      <div class="search-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search name, passport, email..." value="${searchQuery}" oninput="searchQuery=this.value;renderApplications()"/></div>
+      <button class="filter-btn ${currentFilter==="all"?"active":""}" onclick="setFilter('all')">All (${total})</button>
+      <button class="filter-btn ${currentFilter==="pending"?"active":""}" onclick="setFilter('pending')">Pending (${pending})</button>
+      <button class="filter-btn ${currentFilter==="successful"?"active":""}" onclick="setFilter('successful')">Approved (${approved})</button>
+      <button class="filter-btn ${currentFilter==="failed"?"active":""}" onclick="setFilter('failed')">Rejected (${rejected})</button>
+    </div>
+    <div class="table-wrap">${filtered.length===0?'<div class="empty-state">No applications found.</div>':`
+    <table><thead><tr><th>#</th><th>Name</th><th>Passport</th><th>Nationality</th><th>School/University</th><th>Date</th><th>Status</th><th></th></tr></thead><tbody>
+    ${filtered.map((a,i)=>`<tr><td style="color:var(--gray-400);font-size:12px">${i+1}</td><td><div style="font-weight:600;color:var(--gray-900)">${a.english_name||"—"}</div><div style="font-size:12px;color:var(--gray-400)">${a.email||""}</div></td><td style="font-family:monospace">${a.passport_number||"—"}</td><td>${a.nationality||"—"}</td><td style="font-size:12px">${a.school_name||"—"}</td><td style="font-size:12px;color:var(--gray-600)">${fmtDate(a.application_date)}</td><td><span class="badge ${a.application_status}">${a.application_status}</span></td><td><button class="btn-view" onclick="openDetail(${a.id})">View</button></td></tr>`).join("")}
+    </tbody></table>`}</div>`;
+}
+
+function setFilter(f) { currentFilter=f; renderApplications(); }
+function fmtDate(d) { if(!d) return "—"; return new Date(d).toLocaleDateString("en-MY",{day:"2-digit",month:"short",year:"numeric"}); }
+
+async function openDetail(id) {
+  currentApp = allApps.find(a=>a.id===id);
+  if(!currentApp) return;
+  document.getElementById("panelTitle").textContent = currentApp.english_name||"Application";
+  document.getElementById("panelBody").innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  document.getElementById("detailOverlay").classList.add("open");
+  document.getElementById("detailPanel").classList.add("open");
+  renderPanel(currentApp);
+}
+
+function renderPanel(a) {
+  const docs = [
+    {label:"Passport",field:"passport_file"},
+    {label:"High School Certificate",field:"high_school_file"},
+    {label:"English Qualification",field:"english_qualification_file"},
+    {label:"Candidate Progress Report",field:"candidate_progress_report"},
+    {label:"Tuition Fees Statement",field:"tuition_fees_statement_file"},
+    {label:"Confirmation Letter",field:"confirmation_letter"},
+    {label:"Offer Letter",field:"offer_letter_file"},
+    {label:"Academic Specialization",field:"academic_specialization_file"},
+    {label:"Paper from Supervisor",field:"paper_from_supervisor_file"},
+    {label:"Other Supporting Document",field:"other_supporting_file"},
+  ].filter(d=>a[d.field]);
+
+  document.getElementById("panelBody").innerHTML = `
+    <div class="info-section"><div class="info-section-title">Personal Information</div><div class="info-grid">
+      <div class="info-item"><div class="info-label">Name (English)</div><div class="info-value">${a.english_name||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Name (Arabic)</div><div class="info-value">${a.arabic_name||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Passport Number</div><div class="info-value" style="font-family:monospace">${a.passport_number||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Date of Birth</div><div class="info-value">${a.date_of_birth||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Nationality</div><div class="info-value">${a.nationality||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Gender</div><div class="info-value" style="text-transform:capitalize">${a.gender||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Marital Status</div><div class="info-value" style="text-transform:capitalize">${a.marital_status||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Status</div><div class="info-value"><span class="badge ${a.application_status}">${a.application_status}</span></div></div>
+      <div class="info-item full"><div class="info-label">Email</div><div class="info-value">${a.email||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Local Number</div><div class="info-value">${a.local_number||"—"}</div></div>
+      <div class="info-item"><div class="info-label">WhatsApp</div><div class="info-value">${a.whats_app_number||"—"}</div></div>
+      <div class="info-item full"><div class="info-label">Malaysian Address</div><div class="info-value">${a.malaysian_address||"—"}</div></div>
+    </div></div>
+    <div class="info-section"><div class="info-section-title">Academic Information</div><div class="info-grid">
+      <div class="info-item full"><div class="info-label">School / University</div><div class="info-value">${a.school_name||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Current University</div><div class="info-value">${a.current_university_name||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Graduate University</div><div class="info-value">${a.name_graduate_university||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Semesters Remaining</div><div class="info-value">${a.num_sem_graduation||"—"}</div></div>
+      <div class="info-item"><div class="info-label">Application Date</div><div class="info-value">${fmtDate(a.application_date)}</div></div>
+    </div></div>
+    <div class="info-section"><div class="info-section-title">Documents (${docs.length} uploaded)</div>
+    ${docs.length===0?'<p style="color:var(--gray-400);font-size:13px">No documents uploaded.</p>':`
+    <div class="doc-list">${docs.map(d=>`<div class="doc-item"><div class="doc-name"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>${d.label}</div><a href="${API}/${a[d.field]}" target="_blank" class="doc-link">View ↗</a></div>`).join("")}</div>`}
+    </div>`;
+
+  const footer = document.getElementById("panelFooter");
+  if (a.application_status==="successful") {
+    footer.innerHTML = '<div class="status-resolved" style="background:var(--green-light);color:var(--green)">✅ This application has been approved</div>';
+  } else if (a.application_status==="failed") {
+    footer.innerHTML = '<div class="status-resolved" style="background:var(--red-light);color:var(--red)">❌ This application has been rejected</div>';
+  } else {
+    footer.innerHTML = `<button class="btn-reject" onclick="updateStatus(${a.id},'failed')">❌ Reject</button><button class="btn-approve" onclick="updateStatus(${a.id},'successful')">✅ Approve</button>`;
+  }
+}
+
+function closePanel() {
+  document.getElementById("detailOverlay").classList.remove("open");
+  document.getElementById("detailPanel").classList.remove("open");
+}
+
+async function updateStatus(id, status) {
+  const btns = document.querySelectorAll(".btn-approve,.btn-reject");
+  btns.forEach(b=>b.disabled=true);
+  try {
+    const res = await fetch(API + "/applications/" + id + "/", {
+      method: "PATCH",
+      headers: {"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+      body: JSON.stringify({application_status:status})
+    });
+    if (res.ok) {
+      const idx = allApps.findIndex(a=>a.id===id);
+      if (idx>-1) allApps[idx].application_status = status;
+      currentApp = allApps[idx];
+      renderPanel(currentApp);
+      renderApplications();
+    } else {
+      alert("Failed to update. Please try again.");
+      btns.forEach(b=>b.disabled=false);
+    }
+  } catch { alert("Network error."); btns.forEach(b=>b.disabled=false); }
+}
+
+if (token) { document.getElementById("loginPage").style.display="none"; showApp(); }
+</script>
+</body>
+</html>
